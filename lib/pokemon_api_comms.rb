@@ -36,8 +36,7 @@ end
 def get_simplified_pokemon_hashes(pokemon_hashes)
   simplified_pokemon_hashes = []
   pokemon_hashes.each do |pokemon_hash|
-    # create a copy of each hash, so that each hash has fewer keys
-    # and values to make it easier to work with
+    # create a simplified copy of each hash
     simplified_pokemon_hash = pokemon_hash.slice("id", "name", "sprites", "types", "moves")
     # change the value associated with "sprites", so that
     # it points to the value of the front/default sprite
@@ -64,7 +63,9 @@ def get_simplified_pokemon_hashes(pokemon_hashes)
         end
       end
     end
-    simplified_pokemon_hash["moves"] = move_names
+    sorted_move_names = move_names.sort
+    # create a string out of the array of names
+    simplified_pokemon_hash["moves"] = sorted_move_names * ', '
     # change the value of "types", so that it points to an array of
     # strings, which are the names of the types
     type_names = []
@@ -82,10 +83,12 @@ def get_simplified_pokemon_hashes(pokemon_hashes)
         end
       end
     end
-    simplified_pokemon_hash["types"] = type_names
+    sorted_type_names = type_names.sort
+    # create a string out of the array of names
+    simplified_pokemon_hash["types"] = sorted_type_names * ', '
     # add the simplified hash to the associated collection
     simplified_pokemon_hashes << simplified_pokemon_hash
   end
-  puts simplified_pokemon_hashes[3]
+  puts simplified_pokemon_hashes[0]
   simplified_pokemon_hashes
 end
