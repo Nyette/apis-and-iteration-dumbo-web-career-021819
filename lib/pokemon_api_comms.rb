@@ -63,7 +63,7 @@ def get_simplified_pokemon_hashes(pokemon_hashes)
         end
       end
     end
-    sorted_move_names = move_names.sort
+    sorted_move_names = move_names.first(10).sort
     # create a string out of the array of names
     simplified_pokemon_hash["moves"] = sorted_move_names * ', '
     # change the value of "types", so that it points to an array of
@@ -89,6 +89,51 @@ def get_simplified_pokemon_hashes(pokemon_hashes)
     # add the simplified hash to the associated collection
     simplified_pokemon_hashes << simplified_pokemon_hash
   end
-  puts simplified_pokemon_hashes[0]
+  # puts simplified_pokemon_hashes[3]
   simplified_pokemon_hashes
+end
+
+
+def get_all_moves(simplified_pokemon_hashes)
+  names_of_moves = []
+  simplified_pokemon_hashes.each do |pokemon_hash|
+    pokemon_hash.each do |key, value|
+      if key == 'moves'
+        # value = 'bind, cut, ember'
+        pokemon_moves_array = value.split(', ')
+        # pokemon_moves_array = ['bind', 'cut', 'ember']
+        pokemon_moves_array.each do |move_name|
+          names_of_moves << move_name
+          # binding.pry
+        end
+      end
+    end
+  end
+  # puts names_of_moves.uniq.sort
+  names_of_moves.uniq.sort
+  # binding.pry
+end
+
+def get_all_move_hashes(names_of_moves)
+  move_hashes = []
+  names_of_moves.each do |move_name|
+    move_string = RestClient.get("https://pokeapi.co/api/v2/move/#{move_name}/")
+    move_hash = JSON.parse(move_string)
+    simple_move_hash = move_hash.slice("id", "name", "power", "accuracy", "effect_entries")
+    simple_move_hash["effect_entries"] = simple_move_hash["effect_entries"][0]["short_effect"]
+    simple_move_hash["effect"] = simple_move_hash["effect_entries"]
+    simple_move_hash.delete_if do |key, value|
+      key == "effect_entries"
+    end
+    effect_substring = "Has a $effect_chance% chance to"
+    if simple_move_hash["effect"].include? effect_substring
+      simple_move_hash["effect"] = simple_move_hash["effect"].sub(effect_substring, "May")
+    else
+      simple_move_hash["effect"]
+    end
+    move_hashes << simple_move_hash
+    # binding.pry
+  end
+  # puts move_hashes[0..1]
+  move_hashes
 end
